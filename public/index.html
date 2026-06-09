@@ -81,20 +81,24 @@
           </fieldset>
 
           <button id="runButton" type="button">运行框架分析</button>
-          <p id="runNotice" class="run-notice">等待运行。需要后端 API 才会调用 DeepSeek。</p>
+          <p id="runNotice" class="run-notice">等待运行。填写 DeepSeek API Key 后可直接分析。</p>
         </aside>
 
         <section class="results" aria-live="polite">
           <details class="api-config" open>
-            <summary>后端 API 配置</summary>
+            <summary>DeepSeek API 配置</summary>
             <div class="api-grid">
               <label>
-                后端服务地址
-                <input id="backendBaseUrl" placeholder="例如：https://your-app.vercel.app">
+                DeepSeek 接口地址
+                <input id="deepseekBaseUrl" value="https://api.deepseek.com" placeholder="https://api.deepseek.com">
               </label>
               <label>
-                访问密码
-                <input id="sitePassword" type="password" placeholder="后端设置 SITE_PASSWORD 后填写">
+                模型名
+                <input id="deepseekModel" value="deepseek-v4-pro" placeholder="deepseek-v4-pro">
+              </label>
+              <label>
+                DeepSeek API Key
+                <input id="deepseekKey" type="password" placeholder="粘贴你的 sk-...">
               </label>
 
               <label>
@@ -108,7 +112,7 @@
               </label>
               <button id="saveApiConfig" type="button">保存到本机浏览器</button>
             </div>
-            <p id="apiConfigHint">GitHub Pages 不能保存密钥或运行后端；填入后端服务地址后，页面会调用后端的 DeepSeek API。密钥只放在后端环境变量里。</p>
+            <p id="apiConfigHint">API Key 只保存在你当前浏览器的 localStorage，不会写进 GitHub 代码。公共设备不要保存。</p>
           </details>
 
           <section class="pipeline">
@@ -133,7 +137,7 @@
           <div id="cards" class="cards"></div>
           <section class="model-output">
             <h2>模型补充</h2>
-            <p id="modelText">等待后端 API。没有后端地址时不会调用 DeepSeek，也不会使用静态示例冒充分析。</p>
+            <p id="modelText">等待 DeepSeek API。填写并保存 key 后，点击“运行框架分析”。</p>
           </section>
         </section>
       </section>

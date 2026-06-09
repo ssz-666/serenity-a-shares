@@ -10,8 +10,9 @@ const controls = {
   framework: document.querySelector("#framework"),
   mainProvider: document.querySelector("#mainProvider"),
   liteProvider: document.querySelector("#liteProvider"),
-  backendBaseUrl: document.querySelector("#backendBaseUrl"),
-  sitePassword: document.querySelector("#sitePassword"),
+  deepseekBaseUrl: document.querySelector("#deepseekBaseUrl"),
+  deepseekModel: document.querySelector("#deepseekModel"),
+  deepseekKey: document.querySelector("#deepseekKey"),
   dataProvider: document.querySelector("#dataProvider"),
   crowded: document.querySelector("#crowded"),
   verifiedRevenue: document.querySelector("#verifiedRevenue"),
@@ -30,19 +31,9 @@ const roleLabels = {
 };
 
 async function loadConfig() {
-  const backendBaseUrl = normalizeBackendUrl(controls.backendBaseUrl.value);
-  const configUrl = backendBaseUrl ? `${backendBaseUrl}/api/config` : "/api/config";
-
-  try {
-    const response = await fetch(configUrl);
-    if (!response.ok) throw new Error("config failed");
-    const config = await response.json();
-    const chatgpt = config.env?.hasChatGPT ? "ChatGPT 已配置" : "ChatGPT 未配置";
-    const domestic = config.env?.hasDomestic ? "DeepSeek 已配置" : "DeepSeek 未配置";
-    apiStatus.textContent = `${backendBaseUrl ? "后端模式" : "本地后端"} · ${chatgpt} · ${domestic}`;
-  } catch {
-    apiStatus.textContent = "后端未连接 · DeepSeek 未启用";
-  }
+  apiStatus.textContent = controls.deepseekKey.value.trim()
+    ? "DeepSeek 已配置 · 浏览器直连"
+    : "DeepSeek 未配置 · 请填写 API Key";
 }
 
 async function runAnalysis() {
@@ -70,43 +61,30 @@ async function runAnalysis() {
   };
 
   try {
-    const backendBaseUrl = normalizeBackendUrl(controls.backendBaseUrl.value);
-    if (!backendBaseUrl && isGithubPages()) {
-      renderBackendRequired();
+    const apiConfig = readApiConfig(true);
+    if (!apiConfig.deepseek.apiKey) {
+      renderKeyRequired();
       return;
     }
 
-    const analyzeUrl = backendBaseUrl ? `${backendBaseUrl}/api/analyze` : "/api/analyze";
-    const headers = { "content-type": "application/json" };
-    if (controls.sitePassword.value.trim()) {
-      headers["x-site-password"] = controls.sitePassword.value.trim();
-    }
-
-    const response = await fetch(analyzeUrl, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(payload)
-    });
-    if (!response.ok) throw new Error("API unavailable");
-    const data = await response.json();
-    render(data, "后端 API 已返回最新分析。");
+    const data = await runDeepSeekAnalysis(payload, apiConfig.deepseek);
+    renderDeepSeekReport(data);
   } catch (error) {
-    renderError("后端 API 请求失败。请确认后端服务地址、访问密码和 DeepSeek 环境变量。");
+    renderError(`DeepSeek 请求失败：${error.message || "请检查 API Key、模型名、网络或浏览器跨域限制。"}`);
   } finally {
     runButton.disabled = false;
     runButton.textContent = "运行框架分析";
   }
 }
 
-function renderBackendRequired() {
+function renderKeyRequired() {
   timestamp.textContent = new Date().toLocaleString("zh-CN");
-  runNotice.textContent = "未连接后端：GitHub Pages 不能直接调用 DeepSeek。请填写后端服务地址，或先把仓库部署到 Vercel 并配置 DOMESTIC_API_KEY。";
+  runNotice.textContent = "还没有填写 DeepSeek API Key。请在上方配置区粘贴 key 并保存到本机浏览器。";
   runNotice.className = "run-notice is-static";
   modelText.textContent = [
-    "DeepSeek API 不能安全写在 GitHub Pages 前端。",
-    "请把 key 放到后端环境变量：DOMESTIC_API_KEY。",
-    "后端默认配置：DOMESTIC_BASE_URL=https://api.deepseek.com，DOMESTIC_MODEL=deepseek-v4-pro。",
-    "后端部署好后，在上方填写后端服务地址，再点击运行。"
+    "请填写 DeepSeek API Key。",
+    "Key 会保存在你自己的浏览器 localStorage，不会写进 GitHub 代码。",
+    "填好后点击“保存到本机浏览器”，再运行分析。"
   ].join("\n");
   cards.innerHTML = "";
 }
@@ -121,39 +99,109 @@ function renderError(message) {
 
 function readApiConfig(includeSecrets = false) {
   return {
-    chatgpt: {
-      source: "server-env"
-    },
-    domestic: {
-      source: "server-env"
+    deepseek: {
+      baseUrl: normalizeBackendUrl(controls.deepseekBaseUrl.value) || "https://api.deepseek.com",
+      model: controls.deepseekModel.value.trim() || "deepseek-v4-pro",
+      hasKey: Boolean(controls.deepseekKey.value.trim()),
+      ...(includeSecrets ? { apiKey: controls.deepseekKey.value.trim() } : {})
     },
     backend: {
-      baseUrl: normalizeBackendUrl(controls.backendBaseUrl.value),
       dataProvider: controls.dataProvider.value,
-      hasPassword: Boolean(controls.sitePassword.value.trim()),
-      ...(includeSecrets ? { sitePassword: controls.sitePassword.value.trim() } : {})
+      directBrowserMode: true
     }
   };
 }
 
 function saveApiConfig() {
   const config = readApiConfig(true);
-  sessionStorage.setItem("serenity-api-config", JSON.stringify(config));
-  document.querySelector("#apiConfigHint").textContent = "已保存到本机浏览器 sessionStorage。这里只保存后端地址和访问密码；DeepSeek key 仍需放在后端环境变量。";
+  localStorage.setItem("serenity-api-config", JSON.stringify(config));
+  document.querySelector("#apiConfigHint").textContent = "已保存到本机浏览器 localStorage。现在可以直接运行 DeepSeek 分析。";
+  loadConfig();
 }
 
 function loadApiConfig() {
-  const raw = sessionStorage.getItem("serenity-api-config");
+  const raw = localStorage.getItem("serenity-api-config");
   if (!raw) return;
 
   try {
     const config = JSON.parse(raw);
-    controls.backendBaseUrl.value = config.backend?.baseUrl || "";
-    controls.sitePassword.value = config.backend?.sitePassword || "";
+    controls.deepseekBaseUrl.value = config.deepseek?.baseUrl || "https://api.deepseek.com";
+    controls.deepseekModel.value = config.deepseek?.model || "deepseek-v4-pro";
+    controls.deepseekKey.value = config.deepseek?.apiKey || "";
     controls.dataProvider.value = config.backend?.dataProvider || "mock";
   } catch {
-    sessionStorage.removeItem("serenity-api-config");
+    localStorage.removeItem("serenity-api-config");
   }
+}
+
+async function runDeepSeekAnalysis(payload, config) {
+  const response = await fetch(`${config.baseUrl}/chat/completions`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "authorization": `Bearer ${config.apiKey}`
+    },
+    body: JSON.stringify({
+      model: config.model,
+      temperature: 0.2,
+      messages: [
+        {
+          role: "system",
+          content: "你是谨慎的 A 股产业链框架分析助手。只能做 A/B/C/D 证据强度和尽调清单，不给买入、卖出、推荐、入场价或仓位建议，反对杠杆。"
+        },
+        {
+          role: "user",
+          content: buildDeepSeekPrompt(payload)
+        }
+      ]
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(await response.text());
+  }
+
+  const data = await response.json();
+  return {
+    generatedAt: new Date().toISOString(),
+    text: data.choices?.[0]?.message?.content || "DeepSeek 未返回内容。"
+  };
+}
+
+function buildDeepSeekPrompt(payload) {
+  const riskNotes = [];
+  if (payload.riskAnswers.isCrowdedTheme) riskNotes.push("主题交易拥挤：估值和波动要打折。");
+  if (payload.riskAnswers.hasVerifiedRobotRevenue) riskNotes.push("收入路径已验证：已有订单、客户或收入线索。");
+  if (payload.riskAnswers.hasInstitutionalFollow) riskNotes.push("机构跟随改善：只能验证 thesis，不是入场理由。");
+  if (payload.riskAnswers.hasFinancialRedFlag) riskNotes.push("财务/治理红线：需要直接降级复核。");
+
+  return [
+    `行业方向：${payload.industry || "未填写"}`,
+    `分析框架：${payload.framework}`,
+    `风险校准：${riskNotes.join("；") || "无额外校准"}`,
+    "请筛选 3-6 个 A 股产业链候选，按 Serenity chokepoint + 巴菲特生意质量做 A/B/C/D 分层。",
+    "每个候选必须包含：公司名、6 位代码、产业链位置、A/B/C/D、核心 thesis、主要风险、需要继续验证的信号。",
+    "输出最后加一句：这不是投资建议，决策权在用户。"
+  ].join("\n");
+}
+
+function renderDeepSeekReport(data) {
+  timestamp.textContent = new Date(data.generatedAt).toLocaleString("zh-CN");
+  timestamp.classList.remove("is-updated");
+  requestAnimationFrame(() => timestamp.classList.add("is-updated"));
+  runNotice.textContent = "DeepSeek API 已返回最新分析。";
+  runNotice.className = "run-notice is-live";
+  modelText.textContent = data.text;
+  cards.innerHTML = `
+    <article class="candidate report-card">
+      <div class="grade b">AI</div>
+      <div>
+        <h3>DeepSeek 综合报告</h3>
+        <div class="meta">基于你输入的行业方向和风险校准生成</div>
+        <p>${escapeHtml(data.text).replace(/\n/g, "<br>")}</p>
+      </div>
+    </article>
+  `;
 }
 
 function render(data, notice = "分析已更新。") {
@@ -330,8 +378,13 @@ function normalizeBackendUrl(value) {
   return value.trim().replace(/\/$/, "");
 }
 
-function isGithubPages() {
-  return location.hostname.endsWith("github.io");
+function escapeHtml(value) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 document.querySelector("#saveApiConfig").addEventListener("click", saveApiConfig);

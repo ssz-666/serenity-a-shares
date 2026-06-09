@@ -397,6 +397,10 @@ button:disabled {
   border-left: 5px solid var(--green);
 }
 
+.report-card {
+  grid-template-columns: 54px minmax(0, 1fr);
+}
+
 .grade {
   width: 54px;
   height: 54px;
