@@ -1,0 +1,284 @@
+:root {
+  --ink: #17211c;
+  --muted: #65756d;
+  --line: #d8e0da;
+  --paper: #f7f6ef;
+  --panel: #ffffff;
+  --moss: #355d4b;
+  --copper: #b8673a;
+  --sky: #7aa7bd;
+  --danger: #a33f35;
+  --shadow: 0 18px 55px rgba(23, 33, 28, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: "Noto Serif SC", "Source Han Serif SC", Georgia, serif;
+  background:
+    linear-gradient(120deg, rgba(122, 167, 189, 0.22), transparent 36%),
+    linear-gradient(210deg, rgba(184, 103, 58, 0.16), transparent 40%),
+    var(--paper);
+}
+
+button,
+select,
+input {
+  font: inherit;
+}
+
+.shell {
+  width: min(1160px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0 48px;
+}
+
+.hero {
+  min-height: 34vh;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: end;
+  padding: 28px 0 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  color: var(--copper);
+  font-weight: 700;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 14px;
+  font-size: clamp(42px, 7vw, 82px);
+  line-height: 0.96;
+  letter-spacing: 0;
+}
+
+.lede {
+  max-width: 680px;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1.75;
+}
+
+.status-panel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 172px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--copper);
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 22px;
+  margin-top: 22px;
+  align-items: start;
+}
+
+.controls,
+.model-output,
+.candidate {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.controls {
+  position: sticky;
+  top: 18px;
+  padding: 18px;
+}
+
+label,
+legend {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+select {
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+}
+
+fieldset {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+button {
+  width: 100%;
+  min-height: 46px;
+  border: 0;
+  background: var(--moss);
+  color: white;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+
+.toolbar h2,
+.model-output h2 {
+  margin-bottom: 0;
+  font-size: 22px;
+}
+
+#timestamp {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.cards {
+  display: grid;
+  gap: 14px;
+}
+
+.candidate {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  padding: 18px;
+}
+
+.grade {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+  color: white;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.grade.b {
+  background: var(--moss);
+}
+
+.grade.c {
+  background: var(--copper);
+}
+
+.grade.d {
+  background: var(--danger);
+}
+
+.candidate h3 {
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+
+.meta {
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.tag {
+  padding: 6px 8px;
+  background: rgba(122, 167, 189, 0.16);
+  border: 1px solid rgba(122, 167, 189, 0.35);
+  font-size: 13px;
+}
+
+.risk {
+  color: var(--danger);
+}
+
+.model-output {
+  margin-top: 18px;
+  padding: 18px;
+}
+
+.model-output p {
+  margin-bottom: 0;
+  color: var(--muted);
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 780px) {
+  .shell {
+    width: min(100% - 22px, 680px);
+    padding-top: 18px;
+  }
+
+  .hero,
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    min-height: auto;
+    align-items: start;
+  }
+
+  h1 {
+    font-size: 44px;
+  }
+
+  .controls {
+    position: static;
+  }
+
+  .candidate {
+    grid-template-columns: 1fr;
+  }
+}

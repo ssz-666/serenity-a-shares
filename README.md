@@ -38,6 +38,9 @@ AI / 半导体供应链上的"卡脖子选股法"移植到 A 股，做了**重�
 serenity-a-shares/
 ├── SKILL.md                              # 主 skill 文件（含 frontmatter）
 ├── README.md                             # 你在看的这个
+├── public/                               # API 版网页前端
+├── api/                                  # Vercel Serverless API 入口
+├── src/                                  # 候选池、评分规则、模型/数据源适配器
 └── references/
     ├── methodology.md                    # 8 条核心原则的 A 股改写
     ├── industry-map.md                   # 美股 chokepoint → A 股标的池映射
@@ -45,6 +48,54 @@ serenity-a-shares/
     ├── signal-sources.md                 # A 股的 chokepoint 信号源拼图
     └── risk-calibration.md               # 风险校准 & Serenity 本人局限的诚实讨论
 ```
+
+## API 版网页
+
+这个 repo 也预留了一个手机可访问的网页控制台，用来把 skill 的选股框架产品化。
+它只做 A/B/C/D 证据强度、风险校准和尽调清单，不输出买入 / 卖出 / 推荐 / 入场价。
+
+本地运行：
+
+```bash
+npm run dev
+```
+
+打开：
+
+```text
+http://localhost:3000
+```
+
+已预留接口：
+
+- `POST /api/analyze`：统一分析入口，接 Serenity 规则引擎和可替换 LLM
+- `GET /api/market?symbols=688017,002979`：行情 / 财报 / 公告 / 资金流数据入口
+- `GET /api/config`：查看当前服务端开放的模型和数据源类型
+
+模型和数据源都通过环境变量切换，真实密钥不要写进前端代码：
+
+```bash
+cp .env.example .env
+```
+
+可选模型层：
+
+- `MODEL_PROVIDER=mock`：默认占位，不调用外部模型
+- `MODEL_PROVIDER=openai-compatible`：兼容 OpenAI 风格的 `/chat/completions` 接口
+- `MODEL_PROVIDER=custom-http`：转发到你自己的模型服务
+
+可选数据层：
+
+- `DATA_PROVIDER=mock`：默认占位
+- `DATA_PROVIDER=tushare`：预留 Tushare 接口位置
+- `DATA_PROVIDER=akshare-proxy`：预留自建 AkShare 服务代理
+- `DATA_PROVIDER=custom-http`：转发到你自己的行情 / 财报服务
+
+如果要手机公网访问，建议把 GitHub 仓库接到 Vercel。GitHub Pages 只能托管静态网页，
+不适合保存 API key；Vercel / Cloudflare Workers / Netlify Functions 这类带服务端环境变量的平台更适合 API 版。
+
+本仓库已带 GitHub Pages 工作流：`.github/workflows/pages.yml` 会把 `public/` 发布为静态手机页面。
+静态页面会自动使用浏览器内置规则引擎；如果要调用真实模型或行情 API，请再接 Vercel / Cloudflare Workers 作为后端。
 
 ## 怎么用
 

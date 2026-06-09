@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#15251f">
+    <title>Serenity A 股 Chokepoint 控制台</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Serenity A 股 · API 版</p>
+          <h1>Chokepoint 选股控制台</h1>
+          <p class="lede">把机器人、半导体、AI 算力等方向拆成上游卡脖子环节，只输出 A/B/C/D 证据强度和尽调清单。</p>
+        </div>
+        <div class="status-panel" aria-live="polite">
+          <span class="status-dot"></span>
+          <span id="apiStatus">API 待检测</span>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <aside class="controls">
+          <label>
+            行业方向
+            <select id="industry">
+              <option value="robotics">机器人 / 物理 AI</option>
+            </select>
+          </label>
+
+          <label>
+            分析框架
+            <select id="framework">
+              <option value="combined">双框架综合</option>
+              <option value="serenity">Serenity 卡位</option>
+              <option value="buffett">巴菲特质量</option>
+            </select>
+          </label>
+
+          <label>
+            模型接口
+            <select id="provider">
+              <option value="mock">Mock 占位</option>
+              <option value="openai-compatible">OpenAI 兼容</option>
+              <option value="custom-http">自定义 HTTP</option>
+            </select>
+          </label>
+
+          <fieldset>
+            <legend>风险校准</legend>
+            <label class="check"><input type="checkbox" id="crowded"> 主题交易拥挤</label>
+            <label class="check"><input type="checkbox" id="verifiedRevenue"> 机器人收入路径已验证</label>
+            <label class="check"><input type="checkbox" id="institutional"> 机构跟随信号改善</label>
+            <label class="check"><input type="checkbox" id="redFlag"> 财务/治理红线</label>
+          </fieldset>
+
+          <button id="runButton" type="button">运行框架分析</button>
+        </aside>
+
+        <section class="results" aria-live="polite">
+          <div class="toolbar">
+            <h2>候选分层</h2>
+            <span id="timestamp">尚未运行</span>
+          </div>
+          <div id="cards" class="cards"></div>
+          <section class="model-output">
+            <h2>模型补充</h2>
+            <p id="modelText">选择接口后运行。未配置密钥时会使用 mock 返回；GitHub Pages 环境会自动使用浏览器内置规则引擎。</p>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
