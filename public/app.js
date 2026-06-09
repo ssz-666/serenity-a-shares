@@ -22,7 +22,7 @@ const roleLabels = {
   "chatgpt-main": "ChatGPT API",
   "openai-compatible": "OpenAI 兼容",
   "custom-http": "自定义主模型",
-  "domestic-lite": "国产 API",
+  "domestic-lite": "DeepSeek API",
   "openai-compatible-lite": "OpenAI 兼容轻模型",
   "custom-http-lite": "自定义轻模型",
   mock: "Mock 占位"
@@ -37,7 +37,7 @@ async function loadConfig() {
     if (!response.ok) throw new Error("config failed");
     const config = await response.json();
     const chatgpt = config.env?.hasChatGPT ? "ChatGPT 已配置" : "ChatGPT 未配置";
-    const domestic = config.env?.hasDomestic ? "国产 API 已配置" : "国产 API 未配置";
+    const domestic = config.env?.hasDomestic ? "DeepSeek 已配置" : "DeepSeek 未配置";
     apiStatus.textContent = `${backendBaseUrl ? "后端模式" : "本地后端"} · ${chatgpt} · ${domestic}`;
   } catch {
     apiStatus.textContent = "静态模式 · 本地规则";

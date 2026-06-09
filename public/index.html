@@ -54,6 +54,7 @@
           <label>
             <span class="field-title icon-main">主力分析 API</span>
             <select id="mainProvider">
+              <option value="domestic-lite">DeepSeek API</option>
               <option value="chatgpt-main">ChatGPT API</option>
               <option value="openai-compatible">OpenAI 兼容</option>
               <option value="custom-http">自定义主模型</option>
@@ -64,7 +65,7 @@
           <label>
             <span class="field-title icon-lite">便宜任务 API</span>
             <select id="liteProvider">
-              <option value="domestic-lite">国产 API</option>
+              <option value="domestic-lite">DeepSeek API</option>
               <option value="openai-compatible-lite">OpenAI 兼容轻模型</option>
               <option value="custom-http-lite">自定义轻模型</option>
               <option value="mock">Mock 占位</option>
@@ -112,11 +113,11 @@
           <section class="pipeline">
             <div>
               <span>主力分析</span>
-              <strong id="mainRole">ChatGPT API</strong>
+              <strong id="mainRole">DeepSeek API</strong>
             </div>
             <div>
               <span>便宜任务</span>
-              <strong id="liteRole">国产 API</strong>
+              <strong id="liteRole">DeepSeek API</strong>
             </div>
             <div>
               <span>后台服务</span>

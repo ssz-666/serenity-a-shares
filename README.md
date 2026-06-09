@@ -81,15 +81,15 @@ cp .env.example .env
 可选模型层：
 
 - `MODEL_PROVIDER=mock`：默认占位，不调用外部模型
-- `MAIN_MODEL_PROVIDER=chatgpt-main`：ChatGPT API，负责主力分析、逻辑推理、综合判断、报告生成
-- `LITE_MODEL_PROVIDER=domestic-lite`：国产 / 低成本 API，负责基础总结、标题生成、分类、客服问答、简单财报提取
+- `MAIN_MODEL_PROVIDER=domestic-lite`：默认用 DeepSeek / 国产 API 做主力分析、逻辑推理、综合判断、报告生成
+- `LITE_MODEL_PROVIDER=domestic-lite`：默认用 DeepSeek / 国产 API 做基础总结、标题生成、分类、客服问答、简单财报提取
 - `MODEL_PROVIDER=openai-compatible`：兼容 OpenAI 风格的 `/chat/completions` 接口
 - `MODEL_PROVIDER=custom-http`：转发到你自己的模型服务
 
 推荐分工：
 
-- ChatGPT API：主力分析、逻辑推理、综合判断、报告生成
-- 国产 API：便宜任务、基础总结、标题生成、分类、客服问答、简单财报提取
+- DeepSeek / 国产 API：主力分析、逻辑推理、综合判断、报告生成
+- DeepSeek / 国产 API：便宜任务、基础总结、标题生成、分类、客服问答、简单财报提取
 - 后台代码：行情抓取、财务指标计算、缓存、权限、风控
 
 可选数据层：
@@ -119,8 +119,8 @@ CHATGPT_API_KEY=
 CHATGPT_BASE_URL=https://api.openai.com/v1
 CHATGPT_MODEL=
 DOMESTIC_API_KEY=
-DOMESTIC_BASE_URL=
-DOMESTIC_MODEL=
+DOMESTIC_BASE_URL=https://api.deepseek.com
+DOMESTIC_MODEL=deepseek-v4-pro
 DATA_PROVIDER=mock
 SITE_PASSWORD=
 ALLOWED_ORIGIN=https://ssz-666.github.io

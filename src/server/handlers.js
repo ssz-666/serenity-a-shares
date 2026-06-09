@@ -45,7 +45,7 @@ function buildModelPrompt(request, frameworkResult) {
 
 function normalizePipeline(pipeline) {
   return {
-    mainAnalysisProvider: pipeline.mainAnalysisProvider || process.env.MAIN_MODEL_PROVIDER || "chatgpt-main",
+    mainAnalysisProvider: pipeline.mainAnalysisProvider || process.env.MAIN_MODEL_PROVIDER || "domestic-lite",
     liteTaskProvider: pipeline.liteTaskProvider || process.env.LITE_MODEL_PROVIDER || "domestic-lite",
     backendServices: Array.isArray(pipeline.backendServices)
       ? pipeline.backendServices
