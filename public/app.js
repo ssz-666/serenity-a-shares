@@ -3,6 +3,7 @@ const runButton = document.querySelector("#runButton");
 const apiStatus = document.querySelector("#apiStatus");
 const timestamp = document.querySelector("#timestamp");
 const modelText = document.querySelector("#modelText");
+const runNotice = document.querySelector("#runNotice");
 
 const controls = {
   industry: document.querySelector("#industry"),
@@ -47,6 +48,8 @@ async function loadConfig() {
 async function runAnalysis() {
   runButton.disabled = true;
   runButton.textContent = "分析中";
+  runNotice.textContent = "正在运行框架分析...";
+  runNotice.className = "run-notice is-running";
 
   const payload = {
     industry: controls.industry.value,
@@ -68,6 +71,10 @@ async function runAnalysis() {
 
   try {
     const backendBaseUrl = normalizeBackendUrl(controls.backendBaseUrl.value);
+    if (!backendBaseUrl && isGithubPages()) {
+      throw new Error("GitHub Pages static mode");
+    }
+
     const analyzeUrl = backendBaseUrl ? `${backendBaseUrl}/api/analyze` : "/api/analyze";
     const headers = { "content-type": "application/json" };
     if (controls.sitePassword.value.trim()) {
@@ -81,9 +88,9 @@ async function runAnalysis() {
     });
     if (!response.ok) throw new Error("API unavailable");
     const data = await response.json();
-    render(data);
+    render(data, "后端 API 已返回最新分析。");
   } catch (error) {
-    render(runLocalAnalysis(payload));
+    render(runLocalAnalysis(payload), "已使用 GitHub 静态模式重新计算。本地模式只跑示例候选池；接入后端后才会按行业实时换股。");
   } finally {
     runButton.disabled = false;
     runButton.textContent = "运行框架分析";
@@ -127,10 +134,14 @@ function loadApiConfig() {
   }
 }
 
-function render(data) {
+function render(data, notice = "分析已更新。") {
   document.querySelector("#mainRole").textContent = roleLabels[controls.mainProvider.value] || controls.mainProvider.value;
   document.querySelector("#liteRole").textContent = roleLabels[controls.liteProvider.value] || controls.liteProvider.value;
   timestamp.textContent = new Date(data.generatedAt).toLocaleString("zh-CN");
+  timestamp.classList.remove("is-updated");
+  requestAnimationFrame(() => timestamp.classList.add("is-updated"));
+  runNotice.textContent = notice;
+  runNotice.className = notice.includes("后端") ? "run-notice is-live" : "run-notice is-static";
   modelText.textContent = data.modelResult?.text || data.modelResult?.error || "模型未返回内容。";
   cards.innerHTML = "";
 
@@ -275,7 +286,8 @@ function runLocalAnalysis(payload) {
     frameworkResult: { candidates },
     modelResult: {
       text: [
-        "静态模式：当前使用浏览器内置规则引擎。",
+        `静态模式：当前使用浏览器内置规则引擎，行业输入为「${payload.industry || "未填写"}」。`,
+        "注意：静态模式暂时使用机器人示例候选池，不会按新能源车、半导体等行业自动换股。",
         `主力分析预留：${roleLabels[payload.pipeline.mainAnalysisProvider] || payload.pipeline.mainAnalysisProvider}，用于逻辑推理、综合判断和报告生成。`,
         `便宜任务预留：${roleLabels[payload.pipeline.liteTaskProvider] || payload.pipeline.liteTaskProvider}，用于总结、标题、分类、客服问答和简单财报提取。`,
         `当前后端：${payload.pipeline.apiConfig.backend.baseUrl || "未填写，使用 GitHub 静态模式"}。`,
@@ -294,6 +306,10 @@ function toGrade(score) {
 
 function normalizeBackendUrl(value) {
   return value.trim().replace(/\/$/, "");
+}
+
+function isGithubPages() {
+  return location.hostname.endsWith("github.io");
 }
 
 document.querySelector("#saveApiConfig").addEventListener("click", saveApiConfig);
