@@ -105,6 +105,40 @@ cp .env.example .env
 本仓库已带 GitHub Pages 工作流：`.github/workflows/pages.yml` 会把 `public/` 发布为静态手机页面。
 静态页面会自动使用浏览器内置规则引擎；如果要调用真实模型或行情 API，请再接 Vercel / Cloudflare Workers 作为后端。
 
+### 最终版部署方式
+
+当前推荐两段式：
+
+- **GitHub Pages**：先作为手机可访问的前端控制台，不保存真实 API key。
+- **Vercel 后端**：等 API 到位后，把本仓库导入 Vercel，并在 Vercel 环境变量里填写密钥。
+
+后端模式需要的关键环境变量：
+
+```bash
+CHATGPT_API_KEY=
+CHATGPT_BASE_URL=https://api.openai.com/v1
+CHATGPT_MODEL=
+DOMESTIC_API_KEY=
+DOMESTIC_BASE_URL=
+DOMESTIC_MODEL=
+DATA_PROVIDER=mock
+SITE_PASSWORD=
+ALLOWED_ORIGIN=https://ssz-666.github.io
+```
+
+手机页面里只需要填写：
+
+- 后端服务地址：例如 `https://your-app.vercel.app`
+- 访问密码：对应 `SITE_PASSWORD`
+- 数据源偏好：`mock` / `tushare` / `akshare-proxy` / `custom-http`
+
+风险校准含义：
+
+- **主题交易拥挤**：市场已经提前交易预期，估值和波动要打折。
+- **收入路径已验证**：已有订单、客户或收入线索，不只是概念。
+- **机构跟随改善**：只能验证 thesis，不是入场理由。
+- **财务/治理红线**：财务、质押、减持、商誉、监管问题会直接降级复核。
+
 ## 怎么用
 
 ### 方式 1：用 skills CLI 一键安装（推荐）

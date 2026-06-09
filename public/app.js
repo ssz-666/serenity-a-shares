@@ -9,13 +9,8 @@ const controls = {
   framework: document.querySelector("#framework"),
   mainProvider: document.querySelector("#mainProvider"),
   liteProvider: document.querySelector("#liteProvider"),
-  chatgptBaseUrl: document.querySelector("#chatgptBaseUrl"),
-  chatgptModel: document.querySelector("#chatgptModel"),
-  chatgptKey: document.querySelector("#chatgptKey"),
-  domesticBaseUrl: document.querySelector("#domesticBaseUrl"),
-  domesticModel: document.querySelector("#domesticModel"),
-  domesticKey: document.querySelector("#domesticKey"),
   backendBaseUrl: document.querySelector("#backendBaseUrl"),
+  sitePassword: document.querySelector("#sitePassword"),
   dataProvider: document.querySelector("#dataProvider"),
   crowded: document.querySelector("#crowded"),
   verifiedRevenue: document.querySelector("#verifiedRevenue"),
@@ -34,11 +29,16 @@ const roleLabels = {
 };
 
 async function loadConfig() {
+  const backendBaseUrl = normalizeBackendUrl(controls.backendBaseUrl.value);
+  const configUrl = backendBaseUrl ? `${backendBaseUrl}/api/config` : "/api/config";
+
   try {
-    const response = await fetch("/api/config");
+    const response = await fetch(configUrl);
     if (!response.ok) throw new Error("config failed");
     const config = await response.json();
-    apiStatus.textContent = `API 已连接 · ${config.env?.modelProvider || "mock"}`;
+    const chatgpt = config.env?.hasChatGPT ? "ChatGPT 已配置" : "ChatGPT 未配置";
+    const domestic = config.env?.hasDomestic ? "国产 API 已配置" : "国产 API 未配置";
+    apiStatus.textContent = `${backendBaseUrl ? "后端模式" : "本地后端"} · ${chatgpt} · ${domestic}`;
   } catch {
     apiStatus.textContent = "静态模式 · 本地规则";
   }
@@ -67,9 +67,16 @@ async function runAnalysis() {
   };
 
   try {
-    const response = await fetch("/api/analyze", {
+    const backendBaseUrl = normalizeBackendUrl(controls.backendBaseUrl.value);
+    const analyzeUrl = backendBaseUrl ? `${backendBaseUrl}/api/analyze` : "/api/analyze";
+    const headers = { "content-type": "application/json" };
+    if (controls.sitePassword.value.trim()) {
+      headers["x-site-password"] = controls.sitePassword.value.trim();
+    }
+
+    const response = await fetch(analyzeUrl, {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers,
       body: JSON.stringify(payload)
     });
     if (!response.ok) throw new Error("API unavailable");
@@ -86,20 +93,16 @@ async function runAnalysis() {
 function readApiConfig(includeSecrets = false) {
   return {
     chatgpt: {
-      baseUrl: controls.chatgptBaseUrl.value.trim(),
-      model: controls.chatgptModel.value.trim(),
-      hasKey: Boolean(controls.chatgptKey.value.trim()),
-      ...(includeSecrets ? { apiKey: controls.chatgptKey.value.trim() } : {})
+      source: "server-env"
     },
     domestic: {
-      baseUrl: controls.domesticBaseUrl.value.trim(),
-      model: controls.domesticModel.value.trim(),
-      hasKey: Boolean(controls.domesticKey.value.trim()),
-      ...(includeSecrets ? { apiKey: controls.domesticKey.value.trim() } : {})
+      source: "server-env"
     },
     backend: {
-      baseUrl: controls.backendBaseUrl.value.trim(),
-      dataProvider: controls.dataProvider.value
+      baseUrl: normalizeBackendUrl(controls.backendBaseUrl.value),
+      dataProvider: controls.dataProvider.value,
+      hasPassword: Boolean(controls.sitePassword.value.trim()),
+      ...(includeSecrets ? { sitePassword: controls.sitePassword.value.trim() } : {})
     }
   };
 }
@@ -116,13 +119,8 @@ function loadApiConfig() {
 
   try {
     const config = JSON.parse(raw);
-    controls.chatgptBaseUrl.value = config.chatgpt?.baseUrl || controls.chatgptBaseUrl.value;
-    controls.chatgptModel.value = config.chatgpt?.model || "";
-    controls.chatgptKey.value = config.chatgpt?.apiKey || "";
-    controls.domesticBaseUrl.value = config.domestic?.baseUrl || "";
-    controls.domesticModel.value = config.domestic?.model || "";
-    controls.domesticKey.value = config.domestic?.apiKey || "";
     controls.backendBaseUrl.value = config.backend?.baseUrl || "";
+    controls.sitePassword.value = config.backend?.sitePassword || "";
     controls.dataProvider.value = config.backend?.dataProvider || "mock";
   } catch {
     sessionStorage.removeItem("serenity-api-config");
@@ -277,7 +275,7 @@ function runLocalAnalysis(payload) {
         "静态模式：当前使用浏览器内置规则引擎。",
         `主力分析预留：${roleLabels[payload.pipeline.mainAnalysisProvider] || payload.pipeline.mainAnalysisProvider}，用于逻辑推理、综合判断和报告生成。`,
         `便宜任务预留：${roleLabels[payload.pipeline.liteTaskProvider] || payload.pipeline.liteTaskProvider}，用于总结、标题、分类、客服问答和简单财报提取。`,
-        `当前配置：ChatGPT 模型 ${payload.pipeline.apiConfig.chatgpt.model || "未填写"}，国产模型 ${payload.pipeline.apiConfig.domestic.model || "未填写"}，后台 ${payload.pipeline.apiConfig.backend.baseUrl || "未填写"}。`,
+        `当前后端：${payload.pipeline.apiConfig.backend.baseUrl || "未填写，使用 GitHub 静态模式"}。`,
         "后台预留：行情抓取、财务指标计算、缓存、权限、风控。"
       ].join("\n")
     }
@@ -289,6 +287,10 @@ function toGrade(score) {
   if (score >= 62) return "B";
   if (score >= 45) return "C";
   return "D";
+}
+
+function normalizeBackendUrl(value) {
+  return value.trim().replace(/\/$/, "");
 }
 
 document.querySelector("#saveApiConfig").addEventListener("click", saveApiConfig);

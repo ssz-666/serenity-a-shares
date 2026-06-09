@@ -149,10 +149,11 @@ fieldset {
 
 .check {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   color: var(--ink);
   font-weight: 500;
+  line-height: 1.55;
 }
 
 button {

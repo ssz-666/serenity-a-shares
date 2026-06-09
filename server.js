@@ -3,6 +3,8 @@ import { readFile } from "node:fs/promises";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import { handleAnalyze } from "./src/server/handlers.js";
+import { getAccessMode, isAccessAllowed } from "./src/server/auth.js";
+import { setCorsHeaders } from "./src/server/cors.js";
 
 const root = fileURLToPath(new URL(".", import.meta.url));
 const publicDir = join(root, "public");
@@ -24,6 +26,7 @@ async function readJson(req) {
 }
 
 function sendJson(res, status, payload) {
+  setCorsHeaders(res);
   res.writeHead(status, { "content-type": "application/json; charset=utf-8" });
   res.end(JSON.stringify(payload, null, 2));
 }
@@ -55,22 +58,49 @@ createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host}`);
 
+    if (url.pathname.startsWith("/api/") && req.method === "OPTIONS") {
+      setCorsHeaders(res);
+      res.writeHead(204);
+      res.end();
+      return;
+    }
+
     if (url.pathname === "/api/config") {
       sendJson(res, 200, {
         modelProviders: ["mock", "chatgpt-main", "domestic-lite", "openai-compatible", "openai-compatible-lite", "custom-http", "custom-http-lite"],
         dataProviders: ["mock", "tushare", "akshare-proxy", "custom-http"],
+        env: {
+          mainModelProvider: process.env.MAIN_MODEL_PROVIDER || "chatgpt-main",
+          liteModelProvider: process.env.LITE_MODEL_PROVIDER || "domestic-lite",
+          modelProvider: process.env.MODEL_PROVIDER || "mock",
+          dataProvider: process.env.DATA_PROVIDER || "mock",
+          accessMode: getAccessMode(),
+          hasChatGPT: Boolean(process.env.CHATGPT_API_KEY && process.env.CHATGPT_MODEL),
+          hasDomestic: Boolean(process.env.DOMESTIC_API_KEY && process.env.DOMESTIC_BASE_URL && process.env.DOMESTIC_MODEL),
+          hasMarketData: Boolean(process.env.TUSHARE_TOKEN || process.env.AKSHARE_BASE_URL || process.env.CUSTOM_DATA_BASE_URL)
+        },
         note: "API keys are read from server environment variables only."
       });
       return;
     }
 
     if (url.pathname === "/api/analyze" && req.method === "POST") {
+      if (!isAccessAllowed(req)) {
+        sendJson(res, 401, { error: "Unauthorized. Please provide the site password." });
+        return;
+      }
+
       const payload = await readJson(req);
       sendJson(res, 200, await handleAnalyze(payload));
       return;
     }
 
     if (url.pathname === "/api/market") {
+      if (!isAccessAllowed(req)) {
+        sendJson(res, 401, { error: "Unauthorized. Please provide the site password." });
+        return;
+      }
+
       const symbols = (url.searchParams.get("symbols") || "").split(",").filter(Boolean);
       sendJson(res, 200, {
         provider: process.env.DATA_PROVIDER || "mock",

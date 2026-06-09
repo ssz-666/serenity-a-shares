@@ -49,7 +49,8 @@ function normalizePipeline(pipeline) {
     liteTaskProvider: pipeline.liteTaskProvider || process.env.LITE_MODEL_PROVIDER || "domestic-lite",
     backendServices: Array.isArray(pipeline.backendServices)
       ? pipeline.backendServices
-      : ["market-data", "financial-metrics", "cache", "auth", "risk-control"]
+      : ["market-data", "financial-metrics", "cache", "auth", "risk-control"],
+    apiConfig: pipeline.apiConfig || {}
   };
 }
 
