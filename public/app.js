@@ -9,6 +9,14 @@ const controls = {
   framework: document.querySelector("#framework"),
   mainProvider: document.querySelector("#mainProvider"),
   liteProvider: document.querySelector("#liteProvider"),
+  chatgptBaseUrl: document.querySelector("#chatgptBaseUrl"),
+  chatgptModel: document.querySelector("#chatgptModel"),
+  chatgptKey: document.querySelector("#chatgptKey"),
+  domesticBaseUrl: document.querySelector("#domesticBaseUrl"),
+  domesticModel: document.querySelector("#domesticModel"),
+  domesticKey: document.querySelector("#domesticKey"),
+  backendBaseUrl: document.querySelector("#backendBaseUrl"),
+  dataProvider: document.querySelector("#dataProvider"),
   crowded: document.querySelector("#crowded"),
   verifiedRevenue: document.querySelector("#verifiedRevenue"),
   institutional: document.querySelector("#institutional"),
@@ -47,7 +55,8 @@ async function runAnalysis() {
     pipeline: {
       mainAnalysisProvider: controls.mainProvider.value,
       liteTaskProvider: controls.liteProvider.value,
-      backendServices: ["market-data", "financial-metrics", "cache", "auth", "risk-control"]
+      backendServices: ["market-data", "financial-metrics", "cache", "auth", "risk-control"],
+      apiConfig: readApiConfig(false)
     },
     riskAnswers: {
       isCrowdedTheme: controls.crowded.checked,
@@ -71,6 +80,52 @@ async function runAnalysis() {
   } finally {
     runButton.disabled = false;
     runButton.textContent = "运行框架分析";
+  }
+}
+
+function readApiConfig(includeSecrets = false) {
+  return {
+    chatgpt: {
+      baseUrl: controls.chatgptBaseUrl.value.trim(),
+      model: controls.chatgptModel.value.trim(),
+      hasKey: Boolean(controls.chatgptKey.value.trim()),
+      ...(includeSecrets ? { apiKey: controls.chatgptKey.value.trim() } : {})
+    },
+    domestic: {
+      baseUrl: controls.domesticBaseUrl.value.trim(),
+      model: controls.domesticModel.value.trim(),
+      hasKey: Boolean(controls.domesticKey.value.trim()),
+      ...(includeSecrets ? { apiKey: controls.domesticKey.value.trim() } : {})
+    },
+    backend: {
+      baseUrl: controls.backendBaseUrl.value.trim(),
+      dataProvider: controls.dataProvider.value
+    }
+  };
+}
+
+function saveApiConfig() {
+  const config = readApiConfig(true);
+  sessionStorage.setItem("serenity-api-config", JSON.stringify(config));
+  document.querySelector("#apiConfigHint").textContent = "已保存到本机浏览器 sessionStorage。刷新后可继续临时使用；不要在公共设备保存密钥。";
+}
+
+function loadApiConfig() {
+  const raw = sessionStorage.getItem("serenity-api-config");
+  if (!raw) return;
+
+  try {
+    const config = JSON.parse(raw);
+    controls.chatgptBaseUrl.value = config.chatgpt?.baseUrl || controls.chatgptBaseUrl.value;
+    controls.chatgptModel.value = config.chatgpt?.model || "";
+    controls.chatgptKey.value = config.chatgpt?.apiKey || "";
+    controls.domesticBaseUrl.value = config.domestic?.baseUrl || "";
+    controls.domesticModel.value = config.domestic?.model || "";
+    controls.domesticKey.value = config.domestic?.apiKey || "";
+    controls.backendBaseUrl.value = config.backend?.baseUrl || "";
+    controls.dataProvider.value = config.backend?.dataProvider || "mock";
+  } catch {
+    sessionStorage.removeItem("serenity-api-config");
   }
 }
 
@@ -222,6 +277,7 @@ function runLocalAnalysis(payload) {
         "静态模式：当前使用浏览器内置规则引擎。",
         `主力分析预留：${roleLabels[payload.pipeline.mainAnalysisProvider] || payload.pipeline.mainAnalysisProvider}，用于逻辑推理、综合判断和报告生成。`,
         `便宜任务预留：${roleLabels[payload.pipeline.liteTaskProvider] || payload.pipeline.liteTaskProvider}，用于总结、标题、分类、客服问答和简单财报提取。`,
+        `当前配置：ChatGPT 模型 ${payload.pipeline.apiConfig.chatgpt.model || "未填写"}，国产模型 ${payload.pipeline.apiConfig.domestic.model || "未填写"}，后台 ${payload.pipeline.apiConfig.backend.baseUrl || "未填写"}。`,
         "后台预留：行情抓取、财务指标计算、缓存、权限、风控。"
       ].join("\n")
     }
@@ -235,6 +291,8 @@ function toGrade(score) {
   return "D";
 }
 
+document.querySelector("#saveApiConfig").addEventListener("click", saveApiConfig);
 runButton.addEventListener("click", runAnalysis);
+loadApiConfig();
 loadConfig();
 runAnalysis();

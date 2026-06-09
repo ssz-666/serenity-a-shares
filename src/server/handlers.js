@@ -66,6 +66,11 @@ function describePipeline(pipeline) {
     backend: {
       services: pipeline.backendServices,
       responsibilities: ["行情抓取", "财务指标计算", "缓存", "权限", "风控"]
+    },
+    apiConfig: {
+      chatgptModel: pipeline.apiConfig?.chatgpt?.model || process.env.CHATGPT_MODEL || null,
+      domesticModel: pipeline.apiConfig?.domestic?.model || process.env.DOMESTIC_MODEL || null,
+      dataProvider: pipeline.apiConfig?.backend?.dataProvider || process.env.DATA_PROVIDER || "mock"
     }
   };
 }

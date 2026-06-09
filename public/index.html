@@ -77,6 +77,53 @@
         </aside>
 
         <section class="results" aria-live="polite">
+          <details class="api-config" open>
+            <summary>API 配置</summary>
+            <div class="api-grid">
+              <label>
+                ChatGPT 接口地址
+                <input id="chatgptBaseUrl" value="https://api.openai.com/v1" placeholder="https://api.openai.com/v1">
+              </label>
+              <label>
+                ChatGPT 模型名
+                <input id="chatgptModel" placeholder="例如：gpt-4.1 / gpt-4o / gpt-5">
+              </label>
+              <label>
+                ChatGPT API Key
+                <input id="chatgptKey" type="password" placeholder="建议放后端环境变量，不写进网页">
+              </label>
+
+              <label>
+                国产 API 地址
+                <input id="domesticBaseUrl" placeholder="例如：通义 / DeepSeek / 智谱的 OpenAI 兼容地址">
+              </label>
+              <label>
+                国产模型名
+                <input id="domesticModel" placeholder="例如：deepseek-chat / qwen-plus">
+              </label>
+              <label>
+                国产 API Key
+                <input id="domesticKey" type="password" placeholder="建议放后端环境变量，不写进网页">
+              </label>
+
+              <label>
+                后台服务地址
+                <input id="backendBaseUrl" placeholder="Vercel / Cloudflare Worker / 自建后端 URL">
+              </label>
+              <label>
+                数据源
+                <select id="dataProvider">
+                  <option value="mock">Mock 占位</option>
+                  <option value="tushare">Tushare</option>
+                  <option value="akshare-proxy">AkShare 代理</option>
+                  <option value="custom-http">自定义 HTTP</option>
+                </select>
+              </label>
+              <button id="saveApiConfig" type="button">保存到本机浏览器</button>
+            </div>
+            <p id="apiConfigHint">GitHub Pages 是静态页面，长期使用请把密钥放到后端环境变量；这里的密钥只适合你自己设备上的临时测试。</p>
+          </details>
+
           <section class="pipeline">
             <div>
               <span>主力分析</span>
