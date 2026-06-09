@@ -15,6 +15,12 @@
           <h1>Chokepoint 选股控制台</h1>
           <p class="lede">把机器人、半导体、AI 算力等方向拆成上游卡脖子环节，只输出 A/B/C/D 证据强度和尽调清单。</p>
         </div>
+        <div class="hero-art" aria-hidden="true">
+          <span class="cube cube-one"></span>
+          <span class="cube cube-two"></span>
+          <span class="cube cube-three"></span>
+          <span class="lens"></span>
+        </div>
         <div class="status-panel" aria-live="polite">
           <span class="status-dot"></span>
           <span id="apiStatus">API 待检测</span>
@@ -24,7 +30,7 @@
       <section class="workspace">
         <aside class="controls">
           <label>
-            行业方向
+            <span class="field-title icon-industry">行业方向</span>
             <input id="industry" list="industryHints" value="机器人 / 物理 AI" placeholder="例如：机器人、半导体设备、AI 算力、电力设备">
             <datalist id="industryHints">
               <option value="机器人 / 物理 AI"></option>
@@ -37,7 +43,7 @@
           </label>
 
           <label>
-            分析框架
+            <span class="field-title icon-framework">分析框架</span>
             <select id="framework">
               <option value="combined">双框架综合</option>
               <option value="serenity">Serenity 卡位</option>
@@ -46,7 +52,7 @@
           </label>
 
           <label>
-            主力分析 API
+            <span class="field-title icon-main">主力分析 API</span>
             <select id="mainProvider">
               <option value="chatgpt-main">ChatGPT API</option>
               <option value="openai-compatible">OpenAI 兼容</option>
@@ -56,7 +62,7 @@
           </label>
 
           <label>
-            便宜任务 API
+            <span class="field-title icon-lite">便宜任务 API</span>
             <select id="liteProvider">
               <option value="domestic-lite">国产 API</option>
               <option value="openai-compatible-lite">OpenAI 兼容轻模型</option>
@@ -66,7 +72,7 @@
           </label>
 
           <fieldset>
-            <legend>风险校准</legend>
+            <legend class="field-title icon-risk">风险校准</legend>
             <label class="check"><input type="checkbox" id="crowded"> 主题交易拥挤：市场已提前交易预期，估值和波动要打折</label>
             <label class="check"><input type="checkbox" id="verifiedRevenue"> 收入路径已验证：已有订单、客户或收入线索，不只是概念</label>
             <label class="check"><input type="checkbox" id="institutional"> 机构跟随改善：只能验证 thesis，不是入场理由</label>

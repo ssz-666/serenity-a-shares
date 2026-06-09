@@ -149,6 +149,9 @@ function render(data) {
         <p class="risk">主要风险：${item.risks.join("；")}</p>
         ${item.verificationNotes.length ? `<p>校准：${item.verificationNotes.join("；")}</p>` : ""}
       </div>
+      <div class="sparkline" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
     `;
     cards.append(article);
   }
