@@ -25,9 +25,15 @@
         <aside class="controls">
           <label>
             行业方向
-            <select id="industry">
-              <option value="robotics">机器人 / 物理 AI</option>
-            </select>
+            <input id="industry" list="industryHints" value="机器人 / 物理 AI" placeholder="例如：机器人、半导体设备、AI 算力、电力设备">
+            <datalist id="industryHints">
+              <option value="机器人 / 物理 AI"></option>
+              <option value="半导体设备"></option>
+              <option value="半导体材料"></option>
+              <option value="AI 算力 / 服务器链"></option>
+              <option value="光通信 / CPO"></option>
+              <option value="电力设备 / 数据中心电力"></option>
+            </datalist>
           </label>
 
           <label>
@@ -40,11 +46,22 @@
           </label>
 
           <label>
-            模型接口
-            <select id="provider">
-              <option value="mock">Mock 占位</option>
+            主力分析 API
+            <select id="mainProvider">
+              <option value="chatgpt-main">ChatGPT API</option>
               <option value="openai-compatible">OpenAI 兼容</option>
-              <option value="custom-http">自定义 HTTP</option>
+              <option value="custom-http">自定义主模型</option>
+              <option value="mock">Mock 占位</option>
+            </select>
+          </label>
+
+          <label>
+            便宜任务 API
+            <select id="liteProvider">
+              <option value="domestic-lite">国产 API</option>
+              <option value="openai-compatible-lite">OpenAI 兼容轻模型</option>
+              <option value="custom-http-lite">自定义轻模型</option>
+              <option value="mock">Mock 占位</option>
             </select>
           </label>
 
@@ -60,6 +77,21 @@
         </aside>
 
         <section class="results" aria-live="polite">
+          <section class="pipeline">
+            <div>
+              <span>主力分析</span>
+              <strong id="mainRole">ChatGPT API</strong>
+            </div>
+            <div>
+              <span>便宜任务</span>
+              <strong id="liteRole">国产 API</strong>
+            </div>
+            <div>
+              <span>后台服务</span>
+              <strong>行情 · 财务 · 缓存 · 权限 · 风控</strong>
+            </div>
+          </section>
+
           <div class="toolbar">
             <h2>候选分层</h2>
             <span id="timestamp">尚未运行</span>

@@ -57,7 +57,7 @@ createServer(async (req, res) => {
 
     if (url.pathname === "/api/config") {
       sendJson(res, 200, {
-        modelProviders: ["mock", "openai-compatible", "custom-http"],
+        modelProviders: ["mock", "chatgpt-main", "domestic-lite", "openai-compatible", "openai-compatible-lite", "custom-http", "custom-http-lite"],
         dataProviders: ["mock", "tushare", "akshare-proxy", "custom-http"],
         note: "API keys are read from server environment variables only."
       });

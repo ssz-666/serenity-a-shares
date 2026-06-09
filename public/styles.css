@@ -130,6 +130,15 @@ select {
   color: var(--ink);
 }
 
+input {
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+}
+
 fieldset {
   display: grid;
   gap: 12px;
@@ -166,6 +175,33 @@ button:disabled {
   gap: 16px;
   align-items: baseline;
   margin-bottom: 14px;
+}
+
+.pipeline {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.pipeline div {
+  min-height: 82px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.pipeline span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pipeline strong {
+  display: block;
+  line-height: 1.4;
 }
 
 .toolbar h2,
@@ -261,7 +297,8 @@ button:disabled {
   }
 
   .hero,
-  .workspace {
+  .workspace,
+  .pipeline {
     grid-template-columns: 1fr;
   }
 

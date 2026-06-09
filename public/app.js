@@ -7,11 +7,22 @@ const modelText = document.querySelector("#modelText");
 const controls = {
   industry: document.querySelector("#industry"),
   framework: document.querySelector("#framework"),
-  provider: document.querySelector("#provider"),
+  mainProvider: document.querySelector("#mainProvider"),
+  liteProvider: document.querySelector("#liteProvider"),
   crowded: document.querySelector("#crowded"),
   verifiedRevenue: document.querySelector("#verifiedRevenue"),
   institutional: document.querySelector("#institutional"),
   redFlag: document.querySelector("#redFlag")
+};
+
+const roleLabels = {
+  "chatgpt-main": "ChatGPT API",
+  "openai-compatible": "OpenAI 兼容",
+  "custom-http": "自定义主模型",
+  "domestic-lite": "国产 API",
+  "openai-compatible-lite": "OpenAI 兼容轻模型",
+  "custom-http-lite": "自定义轻模型",
+  mock: "Mock 占位"
 };
 
 async function loadConfig() {
@@ -32,7 +43,12 @@ async function runAnalysis() {
   const payload = {
     industry: controls.industry.value,
     framework: controls.framework.value,
-    provider: controls.provider.value,
+    provider: controls.mainProvider.value,
+    pipeline: {
+      mainAnalysisProvider: controls.mainProvider.value,
+      liteTaskProvider: controls.liteProvider.value,
+      backendServices: ["market-data", "financial-metrics", "cache", "auth", "risk-control"]
+    },
     riskAnswers: {
       isCrowdedTheme: controls.crowded.checked,
       hasVerifiedRobotRevenue: controls.verifiedRevenue.checked,
@@ -59,6 +75,8 @@ async function runAnalysis() {
 }
 
 function render(data) {
+  document.querySelector("#mainRole").textContent = roleLabels[controls.mainProvider.value] || controls.mainProvider.value;
+  document.querySelector("#liteRole").textContent = roleLabels[controls.liteProvider.value] || controls.liteProvider.value;
   timestamp.textContent = new Date(data.generatedAt).toLocaleString("zh-CN");
   modelText.textContent = data.modelResult?.text || data.modelResult?.error || "模型未返回内容。";
   cards.innerHTML = "";
@@ -200,7 +218,12 @@ function runLocalAnalysis(payload) {
     generatedAt: new Date().toISOString(),
     frameworkResult: { candidates },
     modelResult: {
-      text: "静态模式：当前使用浏览器内置规则引擎。接入后端 API 后，可调用任意 OpenAI 兼容模型或自定义模型服务。"
+      text: [
+        "静态模式：当前使用浏览器内置规则引擎。",
+        `主力分析预留：${roleLabels[payload.pipeline.mainAnalysisProvider] || payload.pipeline.mainAnalysisProvider}，用于逻辑推理、综合判断和报告生成。`,
+        `便宜任务预留：${roleLabels[payload.pipeline.liteTaskProvider] || payload.pipeline.liteTaskProvider}，用于总结、标题、分类、客服问答和简单财报提取。`,
+        "后台预留：行情抓取、财务指标计算、缓存、权限、风控。"
+      ].join("\n")
     }
   };
 }
