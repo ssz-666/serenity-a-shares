@@ -81,7 +81,7 @@
           </fieldset>
 
           <button id="runButton" type="button">运行框架分析</button>
-          <p id="runNotice" class="run-notice">等待运行。GitHub 静态模式会使用本地示例候选池。</p>
+          <p id="runNotice" class="run-notice">等待运行。需要后端 API 才会调用 DeepSeek。</p>
         </aside>
 
         <section class="results" aria-live="polite">
@@ -108,7 +108,7 @@
               </label>
               <button id="saveApiConfig" type="button">保存到本机浏览器</button>
             </div>
-            <p id="apiConfigHint">GitHub Pages 是静态页面：不填后端地址时使用本地规则引擎；填后端地址后会调用后端。ChatGPT、国产模型和行情 API 的密钥只放在后端环境变量里。</p>
+            <p id="apiConfigHint">GitHub Pages 不能保存密钥或运行后端；填入后端服务地址后，页面会调用后端的 DeepSeek API。密钥只放在后端环境变量里。</p>
           </details>
 
           <section class="pipeline">
@@ -133,7 +133,7 @@
           <div id="cards" class="cards"></div>
           <section class="model-output">
             <h2>模型补充</h2>
-            <p id="modelText">选择接口后运行。未配置密钥时会使用 mock 返回；GitHub Pages 环境会自动使用浏览器内置规则引擎。</p>
+            <p id="modelText">等待后端 API。没有后端地址时不会调用 DeepSeek，也不会使用静态示例冒充分析。</p>
           </section>
         </section>
       </section>

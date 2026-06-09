@@ -132,6 +132,20 @@ ALLOWED_ORIGIN=https://ssz-666.github.io
 - 访问密码：对应 `SITE_PASSWORD`
 - 数据源偏好：`mock` / `tushare` / `akshare-proxy` / `custom-http`
 
+DeepSeek 后端最小配置：
+
+```bash
+MAIN_MODEL_PROVIDER=domestic-lite
+LITE_MODEL_PROVIDER=domestic-lite
+DOMESTIC_BASE_URL=https://api.deepseek.com
+DOMESTIC_MODEL=deepseek-v4-pro
+DOMESTIC_API_KEY=你的 DeepSeek key
+SITE_PASSWORD=你自己设置的访问密码
+ALLOWED_ORIGIN=https://ssz-666.github.io
+```
+
+注意：不要把 `DOMESTIC_API_KEY` 写进 GitHub Pages 前端、README 或提交记录。它只能放在 Vercel / 自建后端的环境变量里。
+
 风险校准含义：
 
 - **主题交易拥挤**：市场已经提前交易预期，估值和波动要打折。

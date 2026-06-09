@@ -41,7 +41,7 @@ async function loadConfig() {
     const domestic = config.env?.hasDomestic ? "DeepSeek 已配置" : "DeepSeek 未配置";
     apiStatus.textContent = `${backendBaseUrl ? "后端模式" : "本地后端"} · ${chatgpt} · ${domestic}`;
   } catch {
-    apiStatus.textContent = "静态模式 · 本地规则";
+    apiStatus.textContent = "后端未连接 · DeepSeek 未启用";
   }
 }
 
@@ -72,7 +72,8 @@ async function runAnalysis() {
   try {
     const backendBaseUrl = normalizeBackendUrl(controls.backendBaseUrl.value);
     if (!backendBaseUrl && isGithubPages()) {
-      throw new Error("GitHub Pages static mode");
+      renderBackendRequired();
+      return;
     }
 
     const analyzeUrl = backendBaseUrl ? `${backendBaseUrl}/api/analyze` : "/api/analyze";
@@ -90,11 +91,32 @@ async function runAnalysis() {
     const data = await response.json();
     render(data, "后端 API 已返回最新分析。");
   } catch (error) {
-    render(runLocalAnalysis(payload), "已使用 GitHub 静态模式重新计算。本地模式只跑示例候选池；接入后端后才会按行业实时换股。");
+    renderError("后端 API 请求失败。请确认后端服务地址、访问密码和 DeepSeek 环境变量。");
   } finally {
     runButton.disabled = false;
     runButton.textContent = "运行框架分析";
   }
+}
+
+function renderBackendRequired() {
+  timestamp.textContent = new Date().toLocaleString("zh-CN");
+  runNotice.textContent = "未连接后端：GitHub Pages 不能直接调用 DeepSeek。请填写后端服务地址，或先把仓库部署到 Vercel 并配置 DOMESTIC_API_KEY。";
+  runNotice.className = "run-notice is-static";
+  modelText.textContent = [
+    "DeepSeek API 不能安全写在 GitHub Pages 前端。",
+    "请把 key 放到后端环境变量：DOMESTIC_API_KEY。",
+    "后端默认配置：DOMESTIC_BASE_URL=https://api.deepseek.com，DOMESTIC_MODEL=deepseek-v4-pro。",
+    "后端部署好后，在上方填写后端服务地址，再点击运行。"
+  ].join("\n");
+  cards.innerHTML = "";
+}
+
+function renderError(message) {
+  timestamp.textContent = new Date().toLocaleString("zh-CN");
+  runNotice.textContent = message;
+  runNotice.className = "run-notice is-static";
+  modelText.textContent = message;
+  cards.innerHTML = "";
 }
 
 function readApiConfig(includeSecrets = false) {
@@ -117,7 +139,7 @@ function readApiConfig(includeSecrets = false) {
 function saveApiConfig() {
   const config = readApiConfig(true);
   sessionStorage.setItem("serenity-api-config", JSON.stringify(config));
-  document.querySelector("#apiConfigHint").textContent = "已保存到本机浏览器 sessionStorage。刷新后可继续临时使用；不要在公共设备保存密钥。";
+  document.querySelector("#apiConfigHint").textContent = "已保存到本机浏览器 sessionStorage。这里只保存后端地址和访问密码；DeepSeek key 仍需放在后端环境变量。";
 }
 
 function loadApiConfig() {
@@ -287,7 +309,7 @@ function runLocalAnalysis(payload) {
     modelResult: {
       text: [
         `静态模式：当前使用浏览器内置规则引擎，行业输入为「${payload.industry || "未填写"}」。`,
-        "注意：静态模式暂时使用机器人示例候选池，不会按新能源车、半导体等行业自动换股。",
+        "本地开发模式仅用于无后端调试；正式 GitHub Pages 不再使用静态示例冒充分析。",
         `主力分析预留：${roleLabels[payload.pipeline.mainAnalysisProvider] || payload.pipeline.mainAnalysisProvider}，用于逻辑推理、综合判断和报告生成。`,
         `便宜任务预留：${roleLabels[payload.pipeline.liteTaskProvider] || payload.pipeline.liteTaskProvider}，用于总结、标题、分类、客服问答和简单财报提取。`,
         `当前后端：${payload.pipeline.apiConfig.backend.baseUrl || "未填写，使用 GitHub 静态模式"}。`,
